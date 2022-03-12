@@ -12,11 +12,19 @@ import Alert from '@mui/material/Alert'
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { value: '', text: '', open: false, done: '' }
+    this.state = {
+      start: false,
+      value: '',
+      text: '',
+      open: false,
+      done: '',
+      counter: 0,
+    }
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.addWord = this.addWord.bind(this)
     this.handleClose = this.handleClose.bind(this)
+    this.handleStart = this.handleStart.bind(this)
     this.generateText = this.generateText.bind(this)
   }
 
@@ -42,7 +50,7 @@ class App extends React.Component {
 
   generateText() {
     const div = document.getElementById('text')
-    const arr = this.state.text.split('. ')
+    const arr = this.state.value.split('. ')
     arr.forEach((element) => {
       const para = document.createElement('p')
       const node = document.createTextNode(element)
@@ -52,12 +60,13 @@ class App extends React.Component {
   }
 
   handleSubmit(event) {
-    this.setState({ text: this.state.value }, this.generateText())
+    this.generateText()
     event.preventDefault()
   }
 
   handleStart(event) {
     action.startFile()
+    this.setState({ start: true })
     event.preventDefault()
   }
 
@@ -67,15 +76,32 @@ class App extends React.Component {
   }
 
   addWord(event) {
-    let str = window.getSelection().toString()
+    var selection
+    if (window.getSelection) selection = window.getSelection()
+    else if (typeof document.selection != 'undefined')
+      selection = document.selection
+    let str = selection.toString()
     if (str.length > 0) {
-      let elem = window.getSelection().getRangeAt(0)
+      let elem = selection.getRangeAt(0)
+      if (elem && !selection.isCollapsed) {
+        if (
+          selection.anchorNode.parentNode === selection.focusNode.parentNode
+        ) {
+          var span = document.createElement('span')
+          span.className = 'highlight'
+          elem.surroundContents(span)
+        }
+      }
       let res = action.postWord({
         word: str,
         element: elem['commonAncestorContainer']['wholeText'],
       })
       if (res) {
-        this.setState({ open: true, done: str })
+        this.setState({
+          open: true,
+          done: str,
+          counter: this.state.counter + 1,
+        })
       }
     }
     event.preventDefault()
@@ -83,35 +109,62 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
-        <Button variant="contained" onClick={this.handleStart}>
-          Start
-        </Button>
-        <Button variant="contained" onClick={this.handleDownload}>
-          Download
-        </Button>
-        <form onSubmit={this.handleSubmit}>
-          <div id="text-enter">
-            <OutlinedInput
-              id="outlined-basic"
-              name="text"
-              variant="outlined"
-              multiline
-              rows={5}
-              value={this.state.value}
-              onChange={this.handleChange}
-              placeholder="Введите текст"
-            />
-
-            <Button variant="contained" type="submit">
-              Готово
-            </Button>
+      <div className="item">
+        <div
+          className="item"
+          style={{
+            flexDirection: 'row',
+            paddingTop: '10px',
+            justifyContent: 'space-around',
+          }}
+        >
+          <Button variant="contained" onClick={this.handleStart}>
+            Start
+          </Button>
+          <Button
+            variant="contained"
+            onClick={this.handleDownload}
+            disabled={!this.state.start}
+          >
+            Download
+          </Button>
+        </div>
+        <div id="text-enter" style={{ width: '95%' }} className="item">
+          <OutlinedInput
+            id="outlined-basic"
+            name="text"
+            variant="outlined"
+            multiline
+            rows={5}
+            className="item"
+            value={this.state.value}
+            onChange={this.handleChange}
+            placeholder="Введите текст"
+          />
+          <Button
+            variant="contained"
+            type="submit"
+            onClick={this.handleSubmit}
+            disabled={!this.state.start}
+          >
+            Готово
+          </Button>
+        </div>
+        <Box
+          component="div"
+          style={{ width: '95%' }}
+          className="item"
+          sx={{ border: '1px dashed grey' }}
+        >
+          <div id="text" className="item">
+            <p>Your text</p>
           </div>
-        </form>
-        <Box component="span" sx={{ p: 2, border: '1px dashed grey' }}>
-          <div id="text"></div>
         </Box>
-        <Fab style={this.style} onClick={this.addWord}>
+        <Fab
+          style={this.style}
+          onClick={this.addWord}
+          disabled={!this.state.start}
+        >
           <AddIcon />
         </Fab>
         <Snackbar
@@ -125,7 +178,7 @@ class App extends React.Component {
             severity="success"
             sx={{ width: '100%' }}
           >
-            {this.state.done}
+            {this.state.done + ' words: ' + this.state.counter.toString()}
           </Alert>
         </Snackbar>
       </div>
