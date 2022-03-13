@@ -76,7 +76,6 @@ def add():
     if request.method == 'POST' and app.config['FILENAME'] != '':
         data = request.get_json()
         print(data)
-        breakpoint()
         ru_word = translate_google(data['word'])
         ru_text = translate_google(data['element'])
         defin = definite(data['word'])
