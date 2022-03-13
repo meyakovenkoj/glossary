@@ -4,7 +4,6 @@ import json
 from flask_cors import CORS
 from os import environ
 import random
-from google.cloud import translate
 import flask_excel as excel
 import urllib.parse
 
