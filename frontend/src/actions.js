@@ -4,7 +4,7 @@ const url = 'http://' + document.location.hostname
 
 export function postWord(form_data) {
   return axios
-    .post(`${url}api/add`, form_data, {
+    .post(`${url}/api/add`, form_data, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -21,7 +21,7 @@ export function postWord(form_data) {
 export function startFile() {
   return axios
     .post(
-      `${url}api/start`,
+      `${url}/api/start`,
       {},
       {
         headers: {
@@ -40,7 +40,7 @@ export function startFile() {
 
 export function downloadFile() {
   return axios
-    .get(`${url}api/stop`, {})
+    .get(`${url}/api/stop`, {})
     .then((res) => {
       const url = window.URL.createObjectURL(new Blob([res.data]))
       const link = document.createElement('a')
