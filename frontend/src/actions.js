@@ -1,23 +1,6 @@
 import axios from 'axios'
 
-const url = 'http://127.0.0.1:5000/'
-
-// export function getRecipes(form_data) {
-//   return (dispatch) => {
-//     axios
-//       .get(`${url}/api/recipe/`, {})
-//       .then((res) => {
-//         if (Array.isArray(res.data.Recipes)) {
-//           let recipes = res.data.Recipes
-//           console.log(recipes)
-//           dispatch({ type: 'GET_RECIPES', recipes })
-//         }
-//       })
-//       .catch((err) => {
-//         alert(err.response.data.message)
-//       })
-//   }
-// }
+const url = 'http://127.0.0.1:5001/'
 
 export function postWord(form_data) {
   return axios

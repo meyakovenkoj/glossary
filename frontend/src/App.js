@@ -94,7 +94,7 @@ class App extends React.Component {
       }
       let res = action.postWord({
         word: str,
-        element: elem['commonAncestorContainer']['wholeText'],
+        element: elem['commonAncestorContainer']['textContent'],
       })
       if (res) {
         this.setState({
@@ -119,14 +119,14 @@ class App extends React.Component {
           }}
         >
           <Button variant="contained" onClick={this.handleStart}>
-            Start
+            Запуск
           </Button>
           <Button
             variant="contained"
             onClick={this.handleDownload}
             disabled={!this.state.start}
           >
-            Download
+            Скачать
           </Button>
         </div>
         <div id="text-enter" style={{ width: '95%' }} className="item">
@@ -147,7 +147,7 @@ class App extends React.Component {
             onClick={this.handleSubmit}
             disabled={!this.state.start}
           >
-            Готово
+            Начать перевод
           </Button>
         </div>
         <Box
@@ -157,7 +157,7 @@ class App extends React.Component {
           sx={{ border: '1px dashed grey' }}
         >
           <div id="text" className="item">
-            <p>Your text</p>
+            <p></p>
           </div>
         </Box>
         <Fab

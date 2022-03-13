@@ -6,26 +6,17 @@ from os import environ
 import random
 from google.cloud import translate
 import flask_excel as excel
-
-NAME = ''
-glossary = []
+import urllib.parse
 
 
 def translate_google(eng_text):
-    project_id = environ.get("PROJECT_ID", "")
-    assert project_id
-    parent = f"projects/{project_id}"
-    client = translate.TranslationServiceClient()
-    target_language_code = "ru"
-    response = client.translate_text(
-        contents=[eng_text],
-        target_language_code=target_language_code,
-        parent=parent,
-    )
-    if len(response.translations) > 0:
-        return response.translations[0].translated_text
-    else:
-        return None
+    translator_url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q="
+    query = urllib.parse.quote(eng_text)
+    r = requests.get(translator_url+query)
+    result = json.loads(r.text)
+    if (result != None and result[0] != None and result[0][0] != None and result[0][0][0] != None):
+        return result[0][0][0]
+    else: return 'NO TRANSLATION'
 
 
 def definite(word):
@@ -49,23 +40,23 @@ def definite(word):
     return 'NO DEFINITION'
 
 
-app = Flask(__name__)
-CORS(app)
-excel.init_excel(app)
+def create_app():
+    app = Flask(__name__)
+    app.config['FILENAME'] = ''
+    app.config['GLOSSARY'] = []
+    CORS(app)
+    excel.init_excel(app)
+    return app
 
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+app = create_app()
 
 
 @app.route("/start", methods=['POST'])
 def start():
-    global NAME
-    global glossary
     num = random.randint(1000, 99999)
-    NAME = str(num) + '.csv'
-    glossary = []
+    app.config['FILENAME'] = str(num) + '.csv'
+    app.config['GLOSSARY'] = []
     return jsonify(isError=False,
                    message="Success",
                    statusCode=200), 200
@@ -73,11 +64,9 @@ def start():
 
 @app.route("/stop", methods=['GET'])
 def stop():
-    global NAME
-    global glossary
-    if NAME != '':
-        return excel.make_response_from_array(glossary, "csv",
-                                              file_name=NAME)
+    if app.config['FILENAME'] != '':
+        return excel.make_response_from_array(app.config['GLOSSARY'], "csv",
+                                              file_name=app.config['FILENAME'])
     return jsonify(isError=True,
                    message="BAD",
                    statusCode=400), 400
@@ -85,15 +74,14 @@ def stop():
 
 @app.route("/api/add", methods=['GET', 'POST'])
 def add():
-    global NAME
-    global glossary
-    if request.method == 'POST' and NAME != '':
+    if request.method == 'POST' and app.config['FILENAME'] != '':
         data = request.get_json()
         print(data)
+        breakpoint()
         ru_word = translate_google(data['word'])
         ru_text = translate_google(data['element'])
         defin = definite(data['word'])
-        glossary.append([data['word'], ru_word, defin,
+        app.config['GLOSSARY'].append([data['word'], ru_word, defin,
                         data['element'],  ru_text])
         return jsonify(isError=False,
                        message="Success",
@@ -102,3 +90,10 @@ def add():
     return jsonify(isError=True,
                    message="BAD",
                    statusCode=400), 400
+
+
+
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5001)
