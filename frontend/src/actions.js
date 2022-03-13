@@ -21,7 +21,7 @@ export function postWord(form_data) {
 export function startFile() {
   return axios
     .post(
-      `${url}start`,
+      `${url}api/start`,
       {},
       {
         headers: {
@@ -40,7 +40,7 @@ export function startFile() {
 
 export function downloadFile() {
   return axios
-    .get(`${url}stop`, {})
+    .get(`${url}api/stop`, {})
     .then((res) => {
       const url = window.URL.createObjectURL(new Blob([res.data]))
       const link = document.createElement('a')

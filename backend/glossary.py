@@ -51,7 +51,7 @@ def create_app():
 app = create_app()
 
 
-@app.route("/start", methods=['POST'])
+@app.route("/api/start", methods=['POST'])
 def start():
     num = random.randint(1000, 99999)
     app.config['FILENAME'] = str(num) + '.csv'
@@ -61,7 +61,7 @@ def start():
                    statusCode=200), 200
 
 
-@app.route("/stop", methods=['GET'])
+@app.route("/api/stop", methods=['GET'])
 def stop():
     if app.config['FILENAME'] != '':
         return excel.make_response_from_array(app.config['GLOSSARY'], "csv",
